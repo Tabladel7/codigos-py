@@ -1,19 +1,19 @@
 import requests
 import json
+requests.packages.urllib3.disable_warnings()
 
-url = "http://<IP_DEL_ROUTER>:<PUERTO>/restconf/data/ietf-interfaces:interfaces/interface=Loopback55"
-username = "TU_USUARIO"
-password = "TU_CONTRASEÑA"
+api_url = "https://192.168.56.111/restconf/data/ietf-interfaces:interfaces/interface=Loopback55"
 
-headers = {
-    "Accept": "application/yang-data+json",
-    "Content-Type": "application/yang-data+json"
+headers = { "Accept": "application/yang-data+json", 
+           "Content-Type": "application/yang-data+json"
 }
 
-body = {
+basicauth = ("cisco", "cisco123!")
+
+yangConfig = {
     "ietf-interfaces:interface": {
         "name": "Loopback55",
-        "description": "Nombre Apellido",
+        "description": "Javier Sandoval",
         "type": "iana-if-type:softwareLoopback",
         "enabled": True,
         "ietf-ip:ipv4": {
@@ -23,9 +23,16 @@ body = {
                     "netmask": "255.255.255.0"
                 }
             ]
-        }
+        },
+        "ietf-ip:ipv6": {}
     }
 }
 
-auth = (username, password)
-response = requests.put(url, headers=headers, auth=auth, data=json.dumps(body))
+
+resp = requests.put(api_url, data=json.dumps(yangConfig), auth=basicauth, headers=headers, verify=False)
+
+if(resp.status_code >= 200 and resp.status_code <= 299): 
+    print("STATUS OK: {}".format(resp.status_code))
+else:
+    print('Error. Status Code: {} \nError message: {}'.format(resp.status_code,resp.json()))
+
